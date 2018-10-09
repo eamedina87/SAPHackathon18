@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Traschend</string>
+    <string name="app_name">Trashcend</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_history">History</string>
@@ -20,6 +20,6 @@
     <string name="trash_color_grey">Grey</string>
     <string name="trash_color_yellow">Yellow</string>
     <string name="trash_color_brown">Brown</string>
-    <string name="trash_description_organic">Organic are fruit remains, and food remains in general.</string>
+    <string name="trash_description_organic">Plastic bottles and containers and aluminum and steel cans belong to the yellow bin.</string>
 
 </resources>

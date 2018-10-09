@@ -76,6 +76,7 @@ class ScanViewFragment : Fragment(), ScanView {
             }
             photoFile.let {
                 callCloudVision(imageBitmap)
+                //onImageProcessingSuccess("")
             }
         }
     }
@@ -92,7 +93,7 @@ class ScanViewFragment : Fragment(), ScanView {
         image_detail.text = results
         //TODO save to Database
         //mPresenter.saveToDatabase()
-        loadResultFragment()
+        loadResultFragment(results)
     }
 
     override fun onImageProcessingError() {
@@ -111,12 +112,21 @@ class ScanViewFragment : Fragment(), ScanView {
         mPresenter?.callCloudVision(prepareAnnotationRequest(bitmap))
     }
 
-    private fun loadResultFragment() {
+    private fun loadResultFragment(results:String) {
         activity?.supportFragmentManager
                 ?.beginTransaction()
-                ?.replace(R.id.fragment_container, ScanResultFragment())
+                ?.replace(R.id.fragment_container, getResultFragment(results))
                 ?.addToBackStack("")
                 ?.commitAllowingStateLoss()
+    }
+
+    private fun getResultFragment(results: String): Fragment? {
+        val fragment = ScanResultFragment()
+        val arguments = Bundle()
+        arguments.putString("Image", mCurrentPhotoPath)
+        arguments.putString("Results", results)
+        fragment.arguments = arguments
+        return  fragment
     }
 
     @Throws(IOException::class)

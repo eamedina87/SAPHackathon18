@@ -4,8 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-
+    >
 
     <ImageView
         android:id="@+id/image"
@@ -18,6 +17,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@id/image_detail"
         android:src="@mipmap/placeholder_square"
+        android:adjustViewBounds="true"
+        />
+
+    <TextView
+        android:id="@+id/results"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        app:layout_constraintStart_toStartOf="@id/image"
+        android:layout_gravity="center"
+        app:layout_constraintTop_toTopOf="@id/image"
         android:adjustViewBounds="true"
         />
 
@@ -46,13 +55,10 @@
             android:layout_gravity="center_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/image_detail"
-            android:src="@mipmap/trash_bin_blue"
+            android:src="@mipmap/trash_bin_yellow"
             android:adjustViewBounds="true"
             />
 
     </LinearLayout>
-
-
-
 
 </LinearLayout>
