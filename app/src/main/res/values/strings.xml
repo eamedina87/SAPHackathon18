@@ -1,6 +1,25 @@
 <resources>
-    <string name="app_name">SAP Challenge</string>
+    <string name="app_name">Traschend</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
+    <string name="title_history">History</string>
     <string name="title_notifications">Notifications</string>
+
+    <!-- TRASH RESULT -->
+    <string name="result_type_label">Type:</string>
+    <string name="result_trash_label">Trash Bin:</string>
+    <string name="result_description_label">Description:</string>
+
+    <!-- TRASH TYPE -->
+    <string name="trash_type_organic">Organic</string>
+    <string name="trash_type_plastic">Plastic</string>
+    <string name="trash_type_paper">Paper</string>
+
+    <!-- TRASH BIN COLOR -->
+    <string name="trash_color_blue">Blue</string>
+    <string name="trash_color_grey">Grey</string>
+    <string name="trash_color_yellow">Yellow</string>
+    <string name="trash_color_brown">Brown</string>
+    <string name="trash_description_organic">Organic are fruit remains, and food remains in general.</string>
+
 </resources>

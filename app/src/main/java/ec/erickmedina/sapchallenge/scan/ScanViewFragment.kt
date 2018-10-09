@@ -1,14 +1,19 @@
 package ec.erickmedina.sapchallenge.scan
 
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
-import android.support.v7.app.AppCompatActivity
+import android.support.v4.app.Fragment
 import ec.erickmedina.sapchallenge.R
 import kotlinx.android.synthetic.main.fragment_scan.*
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import ec.erickmedina.sapchallenge.MainActivity
 import com.google.api.services.vision.v1.Vision
 import com.google.api.services.vision.v1.VisionRequest
@@ -16,14 +21,17 @@ import com.google.api.services.vision.v1.VisionRequestInitializer
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.services.vision.v1.model.*
+import ec.erickmedina.sapchallenge.result.ScanResultFragment
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
 import ec.erickmedina.sapchallenge.utils.PackageManagerUtils
 import ec.erickmedina.sapchallenge.utils.Utils
+import java.io.File
+import java.text.SimpleDateFormat
 
 
-class ScanViewImpl : AppCompatActivity(), ScanView {
+class ScanViewFragment : Fragment(), ScanView {
 
     val REQUEST_IMAGE_CAPTURE = 1
 
@@ -32,13 +40,17 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
     private val ANDROID_PACKAGE_HEADER = "X-Android-Package"
     private val MAX_LABEL_RESULTS = 10
     private val TAG = MainActivity::class.java.simpleName
+    var mCurrentPhotoPath: String = ""
 
     private var mPresenter: ScanPresenterImpl? = null
 
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.fragment_scan)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_scan, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         image.setOnClickListener { scanPicture() }
         mPresenter = ScanPresenterImpl()
         mPresenter?.view = this
@@ -46,7 +58,7 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
 
     private fun scanPicture() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            takePictureIntent.resolveActivity(packageManager)?.also {
+            takePictureIntent.resolveActivity(activity?.packageManager)?.also {
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE)
             }
         }
@@ -57,9 +69,15 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
                 && data.extras!=null && data.hasExtra("data")) {
             val imageBitmap = data.extras.get("data") as Bitmap
             image.setImageBitmap(imageBitmap)
-            callCloudVision(imageBitmap)
+            val photoFile: File? = try {
+                createImageFile()
+            } catch (ex: IOException) {
+                null
+            }
+            photoFile.let {
+                callCloudVision(imageBitmap)
+            }
         }
-
     }
 
     override fun showProgress() {
@@ -72,6 +90,9 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
 
     override fun onImageProcessingSuccess(results:String) {
         image_detail.text = results
+        //TODO save to Database
+        //mPresenter.saveToDatabase()
+        loadResultFragment()
     }
 
     override fun onImageProcessingError() {
@@ -90,6 +111,13 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
         mPresenter?.callCloudVision(prepareAnnotationRequest(bitmap))
     }
 
+    private fun loadResultFragment() {
+        activity?.supportFragmentManager
+                ?.beginTransaction()
+                ?.replace(R.id.fragment_container, ScanResultFragment())
+                ?.addToBackStack("")
+                ?.commitAllowingStateLoss()
+    }
 
     @Throws(IOException::class)
     private fun prepareAnnotationRequest(bitmap: Bitmap): Vision.Images.Annotate {
@@ -105,10 +133,10 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
             override fun initializeVisionRequest(visionRequest: VisionRequest<*>?) {
                 super.initializeVisionRequest(visionRequest)
 
-                val packageName = packageName
+                val packageName = activity!!.packageName
                 visionRequest!!.requestHeaders.set(ANDROID_PACKAGE_HEADER, packageName)
 
-                val sig = PackageManagerUtils.getSignature(packageManager, packageName)
+                val sig = PackageManagerUtils.getSignature(activity!!.packageManager, packageName)
 
                 visionRequest.requestHeaders.set(ANDROID_CERT_HEADER, sig)
             }
@@ -157,6 +185,23 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
         Log.d(TAG, "created Cloud Vision request object, sending request")
 
         return annotateRequest
+    }
+
+
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File = activity!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+        return File.createTempFile(
+                "JPEG_${timeStamp}_", /* prefix */
+                ".jpg", /* suffix */
+                storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            mCurrentPhotoPath = absolutePath
+        }
     }
 
 }
