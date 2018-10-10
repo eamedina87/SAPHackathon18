@@ -12,6 +12,7 @@
 
     <!-- TRASH TYPE -->
     <string name="trash_type_organic">Organic</string>
+    <string name="trash_type_food">Food</string>
     <string name="trash_type_plastic">Plastic</string>
     <string name="trash_type_paper">Paper</string>
     <string name="trash_type_glass">Glass</string>
@@ -24,6 +25,7 @@
     <string name="trash_description_plastic">Plastic bottles and containers and aluminum and steel cans belong to the yellow bin.</string>
     <string name="trash_description_glass">Glass bottles should be disposed in the green container.</string>
     <string name="trash_description_organic">Organics belong to the brown bin.</string>
+    <string name="trash_color_green">Green</string>
 
 
 </resources>

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import ec.erickmedina.sapchallenge.R
 import android.graphics.BitmapFactory
 import kotlinx.android.synthetic.main.fragment_scan_result.*
+import kotlinx.android.synthetic.main.fragment_scan_result.view.*
 import kotlinx.android.synthetic.main.layout_resul_detail.*
 import java.io.File
 
@@ -37,7 +38,7 @@ class ScanResultFragment : Fragment() {
         when {
             resultString.contains(getString(R.string.trash_type_plastic), true) -> showPlasticUI()
             resultString.contains(getString(R.string.trash_type_glass), true) -> showGlassUI()
-            resultString.contains(getString(R.string.trash_type_organic), true) -> showOrganicUI()
+            resultString.contains(getString(R.string.trash_type_food), true) -> showOrganicUI()
             else -> showNoResultUI()
         }
     }
@@ -46,18 +47,21 @@ class ScanResultFragment : Fragment() {
         result_type.text = getString(R.string.trash_type_organic)
         result_trash.text = getString(R.string.trash_color_brown)
         result_description.text = getString(R.string.trash_description_organic)
+        image_trash.setImageResource(R.mipmap.trash_bin_brown)
     }
 
     private fun showGlassUI() {
         result_type.text = getString(R.string.trash_type_glass)
-        result_trash.text = getString(R.string.trash_color_blue)
+        result_trash.text = getString(R.string.trash_color_green)
         result_description.text = getString(R.string.trash_description_glass)
+        image_trash.setImageResource(R.mipmap.trash_bin_green)
     }
 
     private fun showPlasticUI() {
         result_type.text = getString(R.string.trash_type_plastic)
         result_trash.text = getString(R.string.trash_color_yellow)
         result_description.text = getString(R.string.trash_description_plastic)
+        image_trash.setImageResource(R.mipmap.trash_bin_yellow)
     }
 
     private fun showNoResultUI() {
@@ -65,6 +69,5 @@ class ScanResultFragment : Fragment() {
         result_trash.text = "-"
         result_description.text = "-"
     }
-
-
+    
 }
