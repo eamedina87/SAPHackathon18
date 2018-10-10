@@ -69,5 +69,5 @@ class ScanResultFragment : Fragment() {
         result_trash.text = "-"
         result_description.text = "-"
     }
-    
+
 }
