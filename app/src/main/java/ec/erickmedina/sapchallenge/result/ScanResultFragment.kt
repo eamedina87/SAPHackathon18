@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import ec.erickmedina.sapchallenge.R
 import android.graphics.BitmapFactory
 import kotlinx.android.synthetic.main.fragment_scan_result.*
+import kotlinx.android.synthetic.main.layout_resul_detail.*
 import java.io.File
 
 
@@ -20,8 +21,9 @@ class ScanResultFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val imgPath = arguments?.getString("Image")
-        val resultString = arguments?.getString("Results")
+        val resultString = arguments?.getString("Results")!!
         results.text = resultString
+        showTrashInfoForResult(resultString)
         imgPath.let {
             val file = File(imgPath)
             file.let {
@@ -29,6 +31,40 @@ class ScanResultFragment : Fragment() {
                 image.setImageBitmap(bitmap)
             }
         }
-
     }
+
+    private fun showTrashInfoForResult(resultString: String) {
+        when {
+            resultString.contains(getString(R.string.trash_type_plastic), true) -> showPlasticUI()
+            resultString.contains(getString(R.string.trash_type_glass), true) -> showGlassUI()
+            resultString.contains(getString(R.string.trash_type_organic), true) -> showOrganicUI()
+            else -> showNoResultUI()
+        }
+    }
+
+    private fun showOrganicUI() {
+        result_type.text = getString(R.string.trash_type_organic)
+        result_trash.text = getString(R.string.trash_color_brown)
+        result_description.text = getString(R.string.trash_description_organic)
+    }
+
+    private fun showGlassUI() {
+        result_type.text = getString(R.string.trash_type_glass)
+        result_trash.text = getString(R.string.trash_color_blue)
+        result_description.text = getString(R.string.trash_description_glass)
+    }
+
+    private fun showPlasticUI() {
+        result_type.text = getString(R.string.trash_type_plastic)
+        result_trash.text = getString(R.string.trash_color_yellow)
+        result_description.text = getString(R.string.trash_description_plastic)
+    }
+
+    private fun showNoResultUI() {
+        result_type.text = "-"
+        result_trash.text = "-"
+        result_description.text = "-"
+    }
+
+
 }
