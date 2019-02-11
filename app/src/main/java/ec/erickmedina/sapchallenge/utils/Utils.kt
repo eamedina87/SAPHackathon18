@@ -1,7 +1,12 @@
 package ec.erickmedina.sapchallenge.utils
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.os.Environment
 import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -45,6 +50,18 @@ class Utils{
             }
 
             return message.toString()
+        }
+
+        @Throws(IOException::class)
+        fun createImageFile(context: Context): File {
+            // Create an image file name
+            val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+            val storageDir: File = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+            return File.createTempFile(
+                    "JPEG_${timeStamp}_", /* prefix */
+                    ".jpg", /* suffix */
+                    storageDir /* directory */
+            )
         }
     }
 
