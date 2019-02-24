@@ -1,5 +1,7 @@
 package ec.erickmedina.sapchallenge.scan
 
+import ec.erickmedina.sapchallenge.entities.api.IRLabel
+
 interface ScanView {
 
     fun showProgress()
@@ -8,5 +10,6 @@ interface ScanView {
     fun onImageProcessingError()
     fun onRecycleInfoSuccess()
     fun onRecycleInfoError()
+    fun onImageClassificationSuccess(resultLabels: List<IRLabel>?)
 
 }

@@ -8,17 +8,27 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.common.net.MediaType.PNG
+import ec.erickmedina.sapchallenge.entities.api.IRLabel
+import ec.erickmedina.sapchallenge.entities.api.IRResult
+import java.io.ByteArrayOutputStream
+
+
 
 
 class Utils{
 
     companion object {
         val CLOUD_API_KEY = "AIzaSyACBaD96tuTicMTUDqxhIBwn6-E-DFX8RA"
+        val CLASSIFICATION_API_KEY = "Token ca8d6b93083c25de4655a3204839f935671c7a26"
+        val CLASSIFICATION_TASK_ID = "ebbd66bd-8241-45b5-860b-f35aabb2ce9f"
+        val BASE64_HEADER = "data:image/jpeg;base64,"
+
 
         fun scaleBitmapDown(bitmap: Bitmap, maxDimension: Int): Bitmap {
 
-            val originalWidth = bitmap.width
-            val originalHeight = bitmap.height
+            val originalWidth = bitmap.getWidth()
+            val originalHeight = bitmap.getHeight()
             var resizedWidth = maxDimension
             var resizedHeight = maxDimension
 
@@ -62,6 +72,24 @@ class Utils{
                     ".jpg", /* suffix */
                     storageDir /* directory */
             )
+        }
+
+        fun convertBitmapToBase64(bitmap: Bitmap): String {
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+            val byteArray = byteArrayOutputStream.toByteArray()
+            return BASE64_HEADER+Base64.getEncoder().encodeToString(byteArray)
+        }
+
+        fun getResultLabels(response: IRResult): List<IRLabel>? {
+            if (response.status.code!=200)
+                return null
+            if (response.records.isEmpty())
+                return null
+            for (record in response.records) {
+                return record.labels
+            }
+            return null
         }
     }
 

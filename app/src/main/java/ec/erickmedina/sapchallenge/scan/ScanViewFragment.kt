@@ -5,30 +5,19 @@ import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.support.v4.app.Fragment
 import ec.erickmedina.sapchallenge.R
 import kotlinx.android.synthetic.main.fragment_scan.*
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import ec.erickmedina.sapchallenge.MainActivity
-import com.google.api.services.vision.v1.Vision
-import com.google.api.services.vision.v1.VisionRequest
-import com.google.api.services.vision.v1.VisionRequestInitializer
-import com.google.api.client.json.gson.GsonFactory
-import com.google.api.client.extensions.android.http.AndroidHttp
-import com.google.api.services.vision.v1.model.*
+import ec.erickmedina.sapchallenge.entities.api.IRLabel
 import ec.erickmedina.sapchallenge.result.ScanResultFragment
-import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.util.*
-import ec.erickmedina.sapchallenge.utils.PackageManagerUtils
 import ec.erickmedina.sapchallenge.utils.Utils
 import java.io.File
-import java.text.SimpleDateFormat
 
 
 class ScanViewFragment : Fragment(), ScanView {
@@ -43,7 +32,6 @@ class ScanViewFragment : Fragment(), ScanView {
     var mCurrentPhotoPath: String = ""
 
     private var mPresenter: ScanPresenterImpl? = null
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_scan, container, false)
@@ -75,10 +63,15 @@ class ScanViewFragment : Fragment(), ScanView {
                 null
             }
             photoFile.let {
-                callCloudVision(imageBitmap)
+                makeIRImageRequest(imageBitmap)
+                //callCloudVision(imageBitmap)
                 //onImageProcessingSuccess("")
             }
         }
+    }
+
+    private fun makeIRImageRequest(imageBitmap: Bitmap) {
+        mPresenter?.makeIRImageRequest(Utils.convertBitmapToBase64(imageBitmap))
     }
 
     override fun showProgress() {
@@ -108,10 +101,6 @@ class ScanViewFragment : Fragment(), ScanView {
 
     }
 
-    private fun callCloudVision(bitmap: Bitmap) {
-        mPresenter?.callCloudVision(prepareAnnotationRequest(bitmap))
-    }
-
     private fun loadResultFragment(results:String) {
         activity?.supportFragmentManager
                 ?.beginTransaction()
@@ -119,6 +108,7 @@ class ScanViewFragment : Fragment(), ScanView {
                 ?.addToBackStack("")
                 ?.commitAllowingStateLoss()
     }
+
 
     private fun getResultFragment(results: String): Fragment? {
         val fragment = ScanResultFragment()
@@ -129,89 +119,14 @@ class ScanViewFragment : Fragment(), ScanView {
         return  fragment
     }
 
-    @Throws(IOException::class)
-    private fun prepareAnnotationRequest(bitmap: Bitmap): Vision.Images.Annotate {
-        val httpTransport = AndroidHttp.newCompatibleTransport()
-        val jsonFactory = GsonFactory.getDefaultInstance()
-
-        val requestInitializer = object : VisionRequestInitializer(CLOUD_VISION_API_KEY) {
-            /**
-             * We override this so we can inject important identifying fields into the HTTP
-             * headers. This enables use of a restricted cloud platform API key.
-             */
-            @Throws(IOException::class)
-            override fun initializeVisionRequest(visionRequest: VisionRequest<*>?) {
-                super.initializeVisionRequest(visionRequest)
-
-                val packageName = activity!!.packageName
-                visionRequest!!.requestHeaders.set(ANDROID_PACKAGE_HEADER, packageName)
-
-                val sig = PackageManagerUtils.getSignature(activity!!.packageManager, packageName)
-
-                visionRequest.requestHeaders.set(ANDROID_CERT_HEADER, sig)
-            }
-        }
-
-        val builder = Vision.Builder(httpTransport, jsonFactory, null)
-        builder.setVisionRequestInitializer(requestInitializer)
-
-        val vision = builder.build()
-
-        val batchAnnotateImagesRequest = BatchAnnotateImagesRequest()
-        batchAnnotateImagesRequest.requests = object : ArrayList<AnnotateImageRequest>() {
-            init {
-                val annotateImageRequest = AnnotateImageRequest()
-
-                // Add the image
-                val base64EncodedImage = Image()
-                // Convert the bitmap to a JPEG
-                // Just in case it's a format that Android understands but Cloud Vision
-                val byteArrayOutputStream = ByteArrayOutputStream()
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream)
-                val imageBytes = byteArrayOutputStream.toByteArray()
-
-                // Base64 encode the JPEG
-                base64EncodedImage.encodeContent(imageBytes)
-                annotateImageRequest.image = base64EncodedImage
-
-                // add the features we want
-                annotateImageRequest.features = object : ArrayList<Feature>() {
-                    init {
-                        val labelDetection = Feature()
-                        labelDetection.type = "LABEL_DETECTION"
-                        labelDetection.maxResults = MAX_LABEL_RESULTS
-                        add(labelDetection)
-                    }
-                }
-
-                // Add the list of one thing to the request
-                add(annotateImageRequest)
-            }
-        }
-
-        val annotateRequest = vision.images().annotate(batchAnnotateImagesRequest)
-        // Due to a bug: requests to Vision API containing large images fail when GZipped.
-        annotateRequest.disableGZipContent = true
-        Log.d(TAG, "created Cloud Vision request object, sending request")
-
-        return annotateRequest
-    }
-
-
-
-    @Throws(IOException::class)
     private fun createImageFile(): File {
-        // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-        val storageDir: File = activity!!.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile(
-                "JPEG_${timeStamp}_", /* prefix */
-                ".jpg", /* suffix */
-                storageDir /* directory */
-        ).apply {
-            // Save a file: path for use with ACTION_VIEW intents
+        return Utils.createImageFile(context!!).apply {
             mCurrentPhotoPath = absolutePath
         }
     }
 
+
+    override fun onImageClassificationSuccess(resultLabels: List<IRLabel>?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }

@@ -16,6 +16,7 @@ import com.google.api.services.vision.v1.VisionRequestInitializer
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.services.vision.v1.model.*
+import ec.erickmedina.sapchallenge.entities.api.IRLabel
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
@@ -159,4 +160,7 @@ class ScanViewImpl : AppCompatActivity(), ScanView {
         return annotateRequest
     }
 
+    override fun onImageClassificationSuccess(resultLabels: List<IRLabel>?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 }
